@@ -3,6 +3,7 @@
 //  With difficulty selection (Easy: 4, Medium: 5, Hard: 6 balls)
 //  Win condition: each column must have all same color
 //  Progress tracking with non-blocking sidebar messages
+//  Touch support for mobile devices
 // ============================================================
 
 // -------- Constants & DOM refs --------
@@ -237,7 +238,7 @@ function countCompletedColumns() {
     return completed;
 }
 
-// -------- Check if game is won (REVERTED to original simple condition) --------
+// -------- Check if game is won (simple condition) --------
 function isGameWon() {
     // Check if every column has all balls of the same color
     // Empty columns are NOT allowed for winning
@@ -656,6 +657,175 @@ function onMouseUp(e) {
     updateDisplay();
 }
 
+// ============================================================
+//  TOUCH EVENT HANDLERS (Mobile support)
+// ============================================================
+
+// -------- Touch: start (like mouse down) --------
+function onTouchStart(e) {
+    e.preventDefault(); // Prevent scrolling while playing
+    if (won) return;
+    
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const touchX = (touch.clientX - rect.left) * scaleX;
+    const touchY = (touch.clientY - rect.top) * scaleY;
+
+    const col = Math.floor(touchX / CELL_W) + 1;
+    const row = Math.floor(touchY / CELL_H);
+
+    if (col < 1 || col > 6) return;
+    if (row < 0 || row >= ROWS) return;
+
+    const key = 'deque' + col;
+    const dq = deques[key];
+
+    const ballIndex = row - (ROWS - dq.length);
+    if (ballIndex >= 0 && ballIndex < dq.length) {
+        sourceColumn = col;
+        dragColor = dq.shift();
+        dragItem = { x: touchX, y: touchY, color: dragColor };
+        canvas.classList.add('dragging');
+        canvas.classList.remove('ball-hover');
+        draw();
+
+        // Add touch move and end listeners
+        canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+        canvas.addEventListener('touchend', onTouchEnd, { passive: false });
+        canvas.addEventListener('touchcancel', onTouchEnd, { passive: false });
+    } else {
+        colDeq.push(col);
+        if (colDeq.length === 2) {
+            const fromCol = colDeq[1];
+            const toCol = colDeq[0];
+            if (fromCol !== toCol) {
+                makeMove(fromCol, toCol);
+            }
+            colDeq = [];
+        } else if (colDeq.length > 2) {
+            colDeq = [col];
+        }
+    }
+}
+
+// -------- Touch: move (like mouse drag) --------
+function onTouchMove(e) {
+    e.preventDefault();
+    if (!dragItem) return;
+    
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const touchX = (touch.clientX - rect.left) * scaleX;
+    const touchY = (touch.clientY - rect.top) * scaleY;
+
+    dragItem.x = touchX;
+    dragItem.y = touchY;
+
+    const col = Math.floor(touchX / CELL_W);
+    draw();
+    if (col >= 0 && col < COLS) {
+        const x = col * CELL_W;
+        ctx.fillStyle = 'rgba(144, 238, 144, 0.35)';
+        ctx.fillRect(x, 0, CELL_W, canvas.height);
+        for (let c = 0; c < COLS; c++) {
+            for (let r = 0; r < ROWS; r++) {
+                const key = 'deque' + (c + 1);
+                const dq = deques[key];
+                const ballIndex = r - (ROWS - dq.length);
+                if (ballIndex >= 0 && ballIndex < dq.length) {
+                    const cx = c * CELL_W + CELL_W / 2;
+                    const cy = r * CELL_H + CELL_H / 2;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, BALL_RADIUS, 0, Math.PI * 2);
+                    ctx.fillStyle = dq[ballIndex];
+                    ctx.fill();
+                    ctx.strokeStyle = '#222';
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+                }
+            }
+        }
+        if (dragItem) {
+            const cx = dragItem.x;
+            const cy = dragItem.y;
+            ctx.beginPath();
+            ctx.arc(cx, cy, BALL_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = dragItem.color;
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(cx, cy, BALL_RADIUS, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+    }
+}
+
+// -------- Touch: end (like mouse up) --------
+function onTouchEnd(e) {
+    e.preventDefault();
+    if (!dragItem) {
+        canvas.removeEventListener('touchmove', onTouchMove);
+        canvas.removeEventListener('touchend', onTouchEnd);
+        canvas.removeEventListener('touchcancel', onTouchEnd);
+        canvas.classList.remove('dragging', 'ball-hover');
+        return;
+    }
+
+    // Get the last touch position
+    const touch = e.changedTouches[0];
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const touchX = (touch.clientX - rect.left) * scaleX;
+    const touchY = (touch.clientY - rect.top) * scaleY;
+
+    const targetCol = Math.floor(touchX / CELL_W) + 1;
+
+    dragItem = null;
+    canvas.classList.remove('dragging', 'ball-hover');
+
+    canvas.removeEventListener('touchmove', onTouchMove);
+    canvas.removeEventListener('touchend', onTouchEnd);
+    canvas.removeEventListener('touchcancel', onTouchEnd);
+
+    if (sourceColumn !== null && targetCol >= 1 && targetCol <= 6 && targetCol !== sourceColumn) {
+        const toKey = 'deque' + targetCol;
+        const maxBalls = DIFFICULTIES[currentDifficulty].maxBalls;
+        if (deques[toKey].length < maxBalls) {
+            deques[toKey].unshift(dragColor);
+            moves++;
+            colDeq = [];
+            updateDisplay();
+            draw();
+            checkWin();
+        } else {
+            deques['deque' + sourceColumn].unshift(dragColor);
+            draw();
+        }
+    } else {
+        if (sourceColumn !== null) {
+            deques['deque' + sourceColumn].unshift(dragColor);
+            draw();
+        }
+    }
+
+    sourceColumn = null;
+    dragColor = null;
+    dragItem = null;
+    updateDisplay();
+}
+
 // -------- Start game with selected difficulty --------
 function startGame(difficulty) {
     currentDifficulty = difficulty;
@@ -697,12 +867,17 @@ function init() {
         messageOverlay.style.display = 'none';
     });
     
-    // Canvas listeners
+    // -------- Canvas Mouse Listeners --------
     canvas.addEventListener('mousemove', onMouseMoveCursor);
     canvas.addEventListener('mouseleave', function() {
         canvas.classList.remove('ball-hover', 'dragging');
     });
     canvas.addEventListener('mousedown', onMouseDown);
+    
+    // -------- Canvas Touch Listeners (Mobile) --------
+    canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+    // Note: touchmove and touchend are added dynamically when a drag starts
+    // to prevent interfering with other touch interactions
     
     // Start timer
     updateTimer();
