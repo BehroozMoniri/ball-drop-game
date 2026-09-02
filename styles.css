@@ -1,0 +1,502 @@
+* {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+/* ===== DIFFICULTY SELECTION SCREEN ===== */
+#difficulty-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+#difficulty-box {
+    background: white;
+    border-radius: 20px;
+    padding: 30px 40px;
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: popIn 0.5s ease;
+    max-height: 95vh;
+    overflow-y: auto;
+}
+
+#difficulty-box h1 {
+    margin: 0 0 15px 0;
+    color: #2d3748;
+    font-size: 32px;
+}
+
+/* ===== INSTRUCTIONS ===== */
+#instructions {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    text-align: left;
+    border: 2px solid #e2e8f0;
+}
+
+#instructions h3 {
+    margin: 0 0 10px 0;
+    color: #2d3748;
+    font-size: 16px;
+}
+
+#instructions ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #4a5568;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+#instructions ul li {
+    margin-bottom: 4px;
+}
+
+#instructions ul li strong {
+    color: #2d3748;
+}
+
+#instructions ul li em {
+    color: #718096;
+}
+
+#difficulty-box p {
+    color: #718096;
+    margin: 15px 0 20px 0;
+    font-size: 16px;
+}
+
+#difficulty-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.difficulty-btn {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border: 3px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    gap: 15px;
+    width: 100%;
+}
+
+.difficulty-btn:hover {
+    transform: translateX(5px);
+    border-color: #4a6fa5;
+    box-shadow: 0 4px 12px rgba(74, 111, 165, 0.2);
+}
+
+.difficulty-btn .difficulty-icon {
+    font-size: 28px;
+}
+
+.difficulty-btn .difficulty-name {
+    font-weight: bold;
+    font-size: 18px;
+    color: #2d3748;
+}
+
+.difficulty-btn .difficulty-desc {
+    font-size: 14px;
+    color: #718096;
+    margin-left: auto;
+}
+
+.difficulty-btn.easy:hover {
+    border-color: #48bb78;
+    background: #f0fff4;
+}
+
+.difficulty-btn.medium:hover {
+    border-color: #ecc94b;
+    background: #fffff0;
+}
+
+.difficulty-btn.hard:hover {
+    border-color: #fc8181;
+    background: #fff5f5;
+}
+
+#best-times {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 20px;
+    border-top: 2px solid #e2e8f0;
+}
+
+.best-time-item {
+    font-size: 14px;
+    color: #4a5568;
+}
+
+.best-time-item span {
+    font-weight: bold;
+    color: #2d3748;
+}
+
+/* ===== GAME SCREEN ===== */
+#game-screen {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+#game-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    display: inline-block;
+}
+
+#game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 0 4px;
+    width: 100%;
+}
+
+#header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#game-header button {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #718096;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+#game-header button:hover {
+    background: #4a5568;
+}
+
+#difficulty-label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #4a6fa5;
+    padding: 4px 12px;
+    background: #ebf4ff;
+    border-radius: 20px;
+}
+
+#progress-label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #2d7d46;
+    padding: 4px 12px;
+    background: #f0fff4;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+canvas {
+    border-radius: 8px;
+    border: 2px solid #333;
+    cursor: default;
+    display: block;
+    background: #ffffff;
+    touch-action: none;
+}
+
+canvas.dragging {
+    cursor: grabbing !important;
+}
+
+canvas.ball-hover {
+    cursor: grab !important;
+}
+
+#controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#controls button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #4a6fa5;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+#controls button:hover {
+    background: #3a5a8a;
+}
+
+#info {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #333;
+    flex-wrap: wrap;
+}
+
+#info span {
+    font-weight: bold;
+    color: #4a6fa5;
+}
+
+/* ===== PROGRESS SIDEBAR ===== */
+#progress-sidebar {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    min-width: 250px;
+    max-width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    position: sticky;
+    top: 20px;
+}
+
+#progress-sidebar h3 {
+    margin: 0 0 15px 0;
+    color: #2d3748;
+    font-size: 18px;
+    text-align: center;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+}
+
+#messages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.progress-message-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #f7fafc;
+    border-left: 4px solid #4a6fa5;
+    animation: slideIn 0.3s ease;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #2d3748;
+}
+
+.progress-message-item .message-icon {
+    margin-right: 6px;
+}
+
+.progress-message-item .message-time {
+    font-size: 11px;
+    color: #a0aec0;
+    margin-top: 4px;
+    display: block;
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== WIN MESSAGE OVERLAY ===== */
+#message-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 15vh;
+    z-index: 100;
+}
+
+#message-box {
+    background: white;
+    border-radius: 16px;
+    padding: 30px 40px;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    animation: popIn 0.3s ease;
+    margin: 0 20px;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.8) translateY(-20px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+#message-box h2 {
+    margin: 0 0 10px 0;
+    color: #2d7d46;
+}
+
+#message-box p {
+    margin: 8px 0;
+    color: #444;
+    font-size: 16px;
+}
+
+#message-box #bestTimeMessage {
+    font-size: 14px;
+    color: #666;
+}
+
+#message-box .btn-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+#message-box .btn-group button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+#message-box .btn-group .play-again {
+    background: #4a6fa5;
+    color: white;
+}
+
+#message-box .btn-group .play-again:hover {
+    background: #3a5a8a;
+}
+
+#message-box .btn-group .close-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+#message-box .btn-group .close-btn:hover {
+    background: #c0392b;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    #game-screen {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    #progress-sidebar {
+        min-width: unset;
+        max-width: 100%;
+        width: 100%;
+        position: static;
+        max-height: 200px;
+    }
+}
+
+@media (max-width: 500px) {
+    #difficulty-box {
+        padding: 20px;
+    }
+    
+    #difficulty-box h1 {
+        font-size: 26px;
+    }
+    
+    .difficulty-btn {
+        padding: 12px 15px;
+    }
+    
+    .difficulty-btn .difficulty-desc {
+        font-size: 12px;
+    }
+    
+    #game-container {
+        padding: 12px;
+    }
+    
+    #game-header {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    #controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #info {
+        justify-content: center;
+    }
+    
+    #message-box {
+        padding: 20px;
+        margin: 0 15px;
+    }
+    
+    #best-times {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

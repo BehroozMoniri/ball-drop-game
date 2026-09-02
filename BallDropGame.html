@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ball Drop Game</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="main.js" defer></script>
+</head>
+<body>
+    <!-- Difficulty Selection Screen -->
+    <div id="difficulty-screen">
+        <div id="difficulty-box">
+            <h1>🎯 Ball Drop Game</h1>
+            
+            <!-- Instructions -->
+            <div id="instructions">
+                <h3>📖 How to Play</h3>
+                <ul>
+                    <li>Drag a ball from one column to another</li>
+                    <li>You can only move the <strong>top</strong> ball of a column</li>
+                    <li>Each column can hold up to <strong>8</strong> balls</li>
+                    <li><strong>Goal:</strong> Get all balls of the same color into a single column</li>
+                    <li>💡 <em>Tip: Plan your moves carefully!</em></li>
+                </ul>
+            </div>
+            
+            <p>Select your difficulty level:</p>
+            <div id="difficulty-buttons">
+                <button class="difficulty-btn easy" data-level="easy">
+                    <span class="difficulty-icon">🟢</span>
+                    <span class="difficulty-name">Easy</span>
+                    <span class="difficulty-desc">4 balls per column</span>
+                </button>
+                <button class="difficulty-btn medium" data-level="medium">
+                    <span class="difficulty-icon">🟡</span>
+                    <span class="difficulty-name">Medium</span>
+                    <span class="difficulty-desc">5 balls per column</span>
+                </button>
+                <button class="difficulty-btn hard" data-level="hard">
+                    <span class="difficulty-icon">🔴</span>
+                    <span class="difficulty-name">Hard</span>
+                    <span class="difficulty-desc">6 balls per column</span>
+                </button>
+            </div>
+            <div id="best-times">
+                <div class="best-time-item">Easy: <span id="bestTimeEasy">—</span></div>
+                <div class="best-time-item">Medium: <span id="bestTimeMedium">—</span></div>
+                <div class="best-time-item">Hard: <span id="bestTimeHard">—</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+        <div id="game-container" style="display:none;">
+            <div id="game-header">
+                <div id="header-left">
+                    <button id="backToMenuBtn">← Menu</button>
+                    <span id="difficulty-label">Hard</span>
+                </div>
+                <div id="header-right">
+                    <span id="progress-label">Progress: 0/6</span>
+                </div>
+            </div>
+            <canvas id="gameCanvas" width="210" height="280"></canvas>
+            <div id="controls">
+                <div id="info">
+                    <div>Moves: <span id="movesDisplay">0</span></div>
+                    <div>Time: <span id="timeDisplay">0.0</span>s</div>
+                    <div>Best: <span id="bestTimeDisplay">—</span></div>
+                </div>
+                <button id="newGameBtn">New Game</button>
+            </div>
+        </div>
+
+        <!-- Progress Messages Sidebar -->
+        <div id="progress-sidebar" style="display:none;">
+            <div id="progress-messages">
+                <h3>🎯 Progress Updates</h3>
+                <div id="messages-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Message Overlay -->
+    <div id="message-overlay">
+        <div id="message-box">
+            <h2>🎉 Congratulations!</h2>
+            <p id="winMessage"></p>
+            <p id="bestTimeMessage"></p>
+            <div class="btn-group">
+                <button class="play-again" id="winPlayAgain">Play Again</button>
+                <button class="close-btn" id="winClose">Close</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
