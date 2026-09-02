@@ -500,3 +500,31 @@ canvas.ball-hover {
         gap: 8px;
     }
 }
+/* Touch-friendly improvements */
+@media (pointer: coarse) {
+    /* Larger touch targets on mobile */
+    #controls button {
+        padding: 12px 20px;
+        font-size: 16px;
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    #game-header button {
+        padding: 10px 18px;
+        font-size: 15px;
+        min-height: 44px;
+    }
+    
+    canvas {
+        touch-action: none; /* Prevents browser gestures */
+    }
+}
+
+/* Better visual feedback for touch */
+canvas.dragging {
+    cursor: grabbing !important;
+    /* Add a subtle scale effect on touch */
+    transform: scale(1.02);
+    transition: transform 0.1s;
+}
