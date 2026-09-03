@@ -214,33 +214,40 @@ function addProgressMessage(progress) {
 }
 
 // -------- Count completed columns --------
+// -------- Count truly completed columns (FULL columns with all same color) --------
 function countCompletedColumns() {
     let completed = 0;
+    const maxBalls = DIFFICULTIES[currentDifficulty].maxBalls;
+    
     for (let col = 1; col <= 6; col++) {
         const key = 'deque' + col;
         const dq = deques[key];
-        if (dq.length === 0) continue;
         
-        // Check if all balls in this column are the same color
-        const first = dq[0];
-        let allSame = true;
-        for (let i = 1; i < dq.length; i++) {
-            if (dq[i] !== first) {
-                allSame = false;
-                break;
+        // A column is ONLY complete if:
+        // 1. It's FULL (has maxBalls number of balls)
+        // 2. All balls in the column are the same color
+        if (dq.length === maxBalls) {
+            const first = dq[0];
+            let allSame = true;
+            for (let i = 1; i < dq.length; i++) {
+                if (dq[i] !== first) {
+                    allSame = false;
+                    break;
+                }
             }
-        }
-        
-        if (allSame) {
-            completed++;
+            if (allSame) {
+                completed++;
+            }
         }
     }
     return completed;
 }
 
-// -------- Check if game is won (simple condition) --------// -------- Check if game is won (FLEXIBLE condition) --------
+// -------- Check if game is won (FLEXIBLE condition) --------
 function isGameWon() {
-    // Check each column for completion
+    const maxBalls = DIFFICULTIES[currentDifficulty].maxBalls;
+    
+    // Check each column for completion (FULL columns with all same color)
     const completedColumns = [];
     const colorsInColumns = [];
     
@@ -248,45 +255,45 @@ function isGameWon() {
         const key = 'deque' + col;
         const dq = deques[key];
         
-        // Skip empty columns
-        if (dq.length === 0) continue;
-        
-        // Check if all balls in this column are the same color
-        const first = dq[0];
-        let allSame = true;
-        for (let i = 1; i < dq.length; i++) {
-            if (dq[i] !== first) {
-                allSame = false;
-                break;
+        // A column is ONLY complete if:
+        // 1. It's FULL (has maxBalls number of balls)
+        // 2. All balls in the column are the same color
+        if (dq.length === maxBalls) {
+            const first = dq[0];
+            let allSame = true;
+            for (let i = 1; i < dq.length; i++) {
+                if (dq[i] !== first) {
+                    allSame = false;
+                    break;
+                }
             }
-        }
-        
-        if (allSame) {
-            completedColumns.push(col);
-            colorsInColumns.push(first);
+            
+            if (allSame) {
+                completedColumns.push(col);
+                colorsInColumns.push(first);
+            }
         }
     }
     
-    // WIN CONDITION 1: All 5 colors are in their own separate columns
+    // WIN CONDITION 1: All 5 colors are in their own separate FULL columns
     // (5 completed columns with unique colors)
     if (completedColumns.length >= 5) {
         // Check if we have 5 unique colors
         const uniqueColors = new Set(colorsInColumns);
         if (uniqueColors.size === 5) {
-            return true; // All 5 colors are in separate columns!
+            return true; // All 5 colors are in separate FULL columns!
         }
     }
     
-    // WIN CONDITION 2: All 6 columns are completed
+    // WIN CONDITION 2: All 6 columns are FULL and completed
     // (even if colors are repeated)
     if (completedColumns.length === 6) {
-        return true; // All 6 columns are complete!
+        return true; // All 6 columns are FULL and complete!
     }
     
     // No win condition met
     return false;
 }
-
 // -------- Reset game --------
 function resetGame() {
     ROWS = DIFFICULTIES[currentDifficulty].totalRows;
