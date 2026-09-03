@@ -322,8 +322,10 @@ function resetGame() {
 }
 
 // -------- Update progress display --------
+// -------- Update progress display --------
 function updateProgress() {
     const completed = countCompletedColumns();
+    const maxBalls = DIFFICULTIES[currentDifficulty].maxBalls;
     progressLabel.textContent = `Progress: ${completed}/6`;
     
     // Check if new progress milestone reached
@@ -346,7 +348,6 @@ function updateProgress() {
         progressLabel.style.background = '#ebf4ff';
     }
 }
-
 // -------- Check win condition --------
 // -------- Check if game is won (FLEXIBLE condition) --------
 function isGameWon() {
