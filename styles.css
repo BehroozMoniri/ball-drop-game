@@ -2,7 +2,13 @@
     box-sizing: border-box;
     user-select: none;
 }
-
+.hub-link {
+    display: inline-block;
+    color: #4a6fa5;
+    font-weight: bold;
+    text-decoration: none;
+    margin-bottom: 16px;
+}
 body {
     display: flex;
     justify-content: center;
@@ -341,13 +347,7 @@ canvas.ball-hover {
     margin-top: 4px;
     display: block;
 }
-.hub-link {
-    display: inline-block;
-    color: #4a6fa5;
-    font-weight: bold;
-    text-decoration: none;
-    margin-bottom: 16px;
-}
+
 @keyframes slideIn {
     0% {
         opacity: 0;
