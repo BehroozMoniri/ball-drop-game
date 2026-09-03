@@ -238,35 +238,53 @@ function countCompletedColumns() {
     return completed;
 }
 
-// -------- Check if game is won (simple condition) --------
+// -------- Check if game is won (simple condition) --------// -------- Check if game is won (FLEXIBLE condition) --------
 function isGameWon() {
-    // Check if every column has all balls of the same color
-    // Empty columns are NOT allowed for winning
-    let allColumnsValid = true;
+    // Check each column for completion
+    const completedColumns = [];
+    const colorsInColumns = [];
     
     for (let col = 1; col <= 6; col++) {
         const key = 'deque' + col;
         const dq = deques[key];
         
-        // Empty columns are NOT allowed for winning
-        if (dq.length === 0) {
-            allColumnsValid = false;
-            break;
-        }
+        // Skip empty columns
+        if (dq.length === 0) continue;
         
         // Check if all balls in this column are the same color
         const first = dq[0];
+        let allSame = true;
         for (let i = 1; i < dq.length; i++) {
             if (dq[i] !== first) {
-                allColumnsValid = false;
+                allSame = false;
                 break;
             }
         }
         
-        if (!allColumnsValid) break;
+        if (allSame) {
+            completedColumns.push(col);
+            colorsInColumns.push(first);
+        }
     }
     
-    return allColumnsValid;
+    // WIN CONDITION 1: All 5 colors are in their own separate columns
+    // (5 completed columns with unique colors)
+    if (completedColumns.length >= 5) {
+        // Check if we have 5 unique colors
+        const uniqueColors = new Set(colorsInColumns);
+        if (uniqueColors.size === 5) {
+            return true; // All 5 colors are in separate columns!
+        }
+    }
+    
+    // WIN CONDITION 2: All 6 columns are completed
+    // (even if colors are repeated)
+    if (completedColumns.length === 6) {
+        return true; // All 6 columns are complete!
+    }
+    
+    // No win condition met
+    return false;
 }
 
 // -------- Reset game --------
