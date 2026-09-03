@@ -379,9 +379,11 @@ function makeMove(fromCol, toCol) {
 }
 
 // -------- Draw the board --------
+// -------- Draw the board (with 3D balls and no grid lines) --------
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Background - clean white with subtle shadow
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -392,7 +394,7 @@ function draw() {
             const key = 'deque' + (col + 1);
             const dq = deques[key];
 
-            // Highlight completed columns
+            // Check if column is complete for highlight
             const isColumnComplete = (() => {
                 if (dq.length === 0) return false;
                 const first = dq[0];
@@ -402,49 +404,144 @@ function draw() {
                 return true;
             })();
 
-            ctx.fillStyle = isColumnComplete ? '#f0fff4' : 'white';
-            ctx.strokeStyle = isColumnComplete ? '#48bb78' : '#ddd';
-            ctx.lineWidth = isColumnComplete ? 2 : 0.5;
-            ctx.fillRect(x, y, CELL_W, CELL_H);
-            ctx.strokeRect(x, y, CELL_W, CELL_H);
+            // Draw subtle column background (no grid lines)
+            if (isColumnComplete) {
+                ctx.fillStyle = 'rgba(72, 187, 120, 0.08)';
+                ctx.fillRect(x, y, CELL_W, CELL_H);
+            }
 
             const ballIndex = row - (ROWS - dq.length);
             if (ballIndex >= 0 && ballIndex < dq.length) {
                 const color = dq[ballIndex];
                 const cx = x + CELL_W / 2;
                 const cy = y + CELL_H / 2;
+                const radius = BALL_RADIUS;
+                
+                // -------- Draw 3D ball with gradient --------
+                // Create radial gradient for 3D effect
+                const gradient = ctx.createRadialGradient(
+                    cx - radius * 0.3, cy - radius * 0.3, radius * 0.1,
+                    cx, cy, radius
+                );
+                
+                // Color mapping for 3D effect
+                const colorMap = {
+                    'lime': { light: '#8eff8e', mid: '#32cd32', dark: '#228b22' },
+                    'red': { light: '#ff6b6b', mid: '#dc143c', dark: '#8b0000' },
+                    'blue': { light: '#6b9fff', mid: '#1e90ff', dark: '#0b3d91' },
+                    'yellow': { light: '#ffe66d', mid: '#ffd700', dark: '#b8860b' },
+                    'orange': { light: '#ffb347', mid: '#ff8c00', dark: '#cc5500' }
+                };
+                
+                const colors = colorMap[color] || colorMap['blue'];
+                
+                // Add gradient stops
+                gradient.addColorStop(0, colors.light);     // Highlight (top-left)
+                gradient.addColorStop(0.5, colors.mid);      // Main color
+                gradient.addColorStop(1, colors.dark);       // Shadow (bottom-right)
+                
+                // Draw ball with shadow
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetX = 1;
+                ctx.shadowOffsetY = 2;
+                
                 ctx.beginPath();
-                ctx.arc(cx, cy, BALL_RADIUS, 0, Math.PI * 2);
-                ctx.fillStyle = color;
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
                 ctx.fill();
-                ctx.strokeStyle = '#222';
-                ctx.lineWidth = 1.2;
+                
+                // Reset shadow for outline
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                
+                // Add subtle outline
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+                ctx.lineWidth = 0.5;
                 ctx.stroke();
+                
+                // Add glossy highlight (small white reflection)
+                ctx.beginPath();
+                ctx.arc(cx - radius * 0.25, cy - radius * 0.25, radius * 0.2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fill();
+                
+                // Add secondary smaller highlight
+                ctx.beginPath();
+                ctx.arc(cx - radius * 0.15, cy - radius * 0.4, radius * 0.08, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fill();
             }
         }
     }
 
+    // Draw drag item on top (with 3D effect)
     if (dragItem) {
         const cx = dragItem.x;
         const cy = dragItem.y;
+        const radius = BALL_RADIUS;
+        const color = dragItem.color;
+        
+        const colorMap = {
+            'lime': { light: '#8eff8e', mid: '#32cd32', dark: '#228b22' },
+            'red': { light: '#ff6b6b', mid: '#dc143c', dark: '#8b0000' },
+            'blue': { light: '#6b9fff', mid: '#1e90ff', dark: '#0b3d91' },
+            'yellow': { light: '#ffe66d', mid: '#ffd700', dark: '#b8860b' },
+            'orange': { light: '#ffb347', mid: '#ff8c00', dark: '#cc5500' }
+        };
+        
+        const colors = colorMap[color] || colorMap['blue'];
+        
+        // Larger shadow for dragged ball
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 4;
+        
+        const gradient = ctx.createRadialGradient(
+            cx - radius * 0.3, cy - radius * 0.3, radius * 0.1,
+            cx, cy, radius
+        );
+        gradient.addColorStop(0, colors.light);
+        gradient.addColorStop(0.5, colors.mid);
+        gradient.addColorStop(1, colors.dark);
+        
         ctx.beginPath();
-        ctx.arc(cx, cy, BALL_RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = dragItem.color;
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
         ctx.fill();
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-        ctx.shadowColor = 'rgba(0,0,0,0.2)';
-        ctx.shadowBlur = 10;
+        
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Glossy highlight on dragged ball
         ctx.beginPath();
-        ctx.arc(cx, cy, BALL_RADIUS, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-        ctx.lineWidth = 3;
+        ctx.arc(cx - radius * 0.25, cy - radius * 0.25, radius * 0.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(cx - radius * 0.15, cy - radius * 0.4, radius * 0.08, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.fill();
+        
+        // Glow effect when dragging
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.2)';
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 2;
         ctx.stroke();
+        ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;
     }
 }
-
 // -------- Update display --------
 function updateDisplay() {
     movesDisplay.textContent = moves;
