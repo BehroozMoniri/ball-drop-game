@@ -341,6 +341,56 @@ function updateProgress() {
 }
 
 // -------- Check win condition --------
+// -------- Check if game is won (FLEXIBLE condition) --------
+function isGameWon() {
+    // Check each column for completion
+    const completedColumns = [];
+    const colorsInColumns = [];
+    
+    for (let col = 1; col <= 6; col++) {
+        const key = 'deque' + col;
+        const dq = deques[key];
+        
+        // Skip empty columns
+        if (dq.length === 0) continue;
+        
+        // Check if all balls in this column are the same color
+        const first = dq[0];
+        let allSame = true;
+        for (let i = 1; i < dq.length; i++) {
+            if (dq[i] !== first) {
+                allSame = false;
+                break;
+            }
+        }
+        
+        if (allSame) {
+            completedColumns.push(col);
+            colorsInColumns.push(first);
+        }
+    }
+    
+    // WIN CONDITION 1: All 5 colors are in their own separate columns
+    // (5 completed columns with unique colors)
+    if (completedColumns.length >= 5) {
+        // Check if we have 5 unique colors
+        const uniqueColors = new Set(colorsInColumns);
+        if (uniqueColors.size === 5) {
+            return true; // All 5 colors are in separate columns!
+        }
+    }
+    
+    // WIN CONDITION 2: All 6 columns are completed
+    // (even if colors are repeated)
+    if (completedColumns.length === 6) {
+        return true; // All 6 columns are complete!
+    }
+    
+    // No win condition met
+    return false;
+}
+
+// -------- Check win condition --------
 function checkWin() {
     if (won) return true;
     
@@ -359,7 +409,16 @@ function checkWin() {
             updateBestTimesDisplay();
         }
         
-        const message = `You solved the puzzle in ${moves} moves and ${elapsed.toFixed(2)} seconds!`;
+        // Determine which win condition was met
+        const completed = countCompletedColumns();
+        let winMessageText = '';
+        if (completed === 6) {
+            winMessageText = '🎯 All 6 columns are complete!';
+        } else {
+            winMessageText = '🌈 All 5 colors are in their own columns!';
+        }
+        
+        const message = `${winMessageText}\nYou solved the puzzle in ${moves} moves and ${elapsed.toFixed(2)} seconds!`;
         winMessage.textContent = message;
         if (bestTimes[currentDifficulty]) {
             bestTimeMessage.textContent = `🏆 Fastest ${DIFFICULTIES[currentDifficulty].label} time: ${bestTimes[currentDifficulty].toFixed(2)} seconds!`;
@@ -376,7 +435,6 @@ function checkWin() {
     }
     return false;
 }
-
 // -------- Make a move --------
 function makeMove(fromCol, toCol) {
     const fromKey = 'deque' + fromCol;
